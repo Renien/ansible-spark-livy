@@ -1,0 +1,33 @@
+---
+
+- name: check docker-compose version
+  become: yes
+  shell: docker-compose --version
+  register: docker_compose_version
+
+- name: debug docker_compose_version
+  debug:
+    var: docker_compose_version
+
+- name: Find out playbook's path
+  shell: pwd
+  register: playbook_path_output
+
+- debug:
+    msg: "'{{ playbook_path_output.stdout }}' is the playbook directory"
+
+- name: "copy the docker folder {{ docker_path | default('spark-image/docker-livy-spark') }}"
+  copy:
+    src: "./tasks/"
+    dest: "/root/{{ docker_path | default('spark-image/docker-livy-spark') }}/"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Run docker-compose up
+  become: yes
+  shell: "nohup docker-compose up >/dev/null 2>&1 &"
+  args:
+    chdir: "/root/{{ docker_path | default('spark-image/docker-livy-spark') }}/"
+  async: 10
+  poll: 0

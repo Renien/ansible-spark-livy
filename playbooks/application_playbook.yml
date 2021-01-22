@@ -1,0 +1,5 @@
+---
+- hosts: host
+  roles:
+    - { role: docker, become: yes }
+    - { role: docker-livy-spark, become: yes }

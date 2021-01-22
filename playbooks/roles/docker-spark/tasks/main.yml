@@ -1,0 +1,35 @@
+---
+
+- name: check docker-compose version
+  become: yes
+  shell: docker-compose --version
+  register: docker_compose_version
+
+- name: debug docker_compose_version
+  debug:
+    var: docker_compose_version
+
+- name: Find out playbook's path
+  shell: pwd
+  register: playbook_path_output
+
+- debug:
+    msg: "'{{ playbook_path_output.stdout }}' is the playbook directory"
+
+- name: copy Dockerfile
+  copy:
+    src: "../../../dockerfiles/{{ docker_path }}/Dockerfile"
+    dest: "{{ playbook_path_output.stdout }}/roles/docker-spark/tasks/Dockerfile"
+
+- name: Run docker-compose up
+  become: yes
+  shell: "nohup docker-compose up >/dev/null 2>&1 &"
+  args:
+    chdir: "/{{ playbook_path_output.stdout }}/roles/docker-livy-spark/tasks/"
+  async: 10
+  poll: 0
+
+- name: Remove copied Dockerfile
+  file:
+    path: "/{{ playbook_path_output.stdout }}/roles/docker-spark/tasks/Dockerfile"
+    state: absent
