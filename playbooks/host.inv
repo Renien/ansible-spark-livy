@@ -3,6 +3,3 @@
 # Testing on a local machine
 [local_host]
 127.0.0.1
-
-[local:children]
-local_host
